@@ -10,7 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let token = localStorage.getItem('token');
 
     const apiUrl = 'https://to-do-oxeu.onrender.com';
-
+    
+    registerBtn.addEventListener('click', registerUser);
+    loginBtn.addEventListener('click', loginUser);
+    
+    
     function showAuthSection() {
         authSection.style.display = 'block';
         todoSection.style.display = 'none';
@@ -29,31 +33,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Login event
-    loginBtn.addEventListener('click', async function() {
+    //loginBtn.addEventListener('click', async function() {
+    async function loginUser(event) {
+        event.preventDefault(); //prevent page from refreshing
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
 
-        const response = await fetch(`${apiUrl}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+        try {
+            const response = await fetch(`${apiUrl}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
         });
 
         const result = await response.json();
         if (result.success) {
+            alert('User login successfull!');
             localStorage.setItem('token', result.token);
             token = result.token;
             loadTodos();
         } else {
+            alert('Registration failed: ' + result.message);
             document.getElementById('auth-msg').innerText = result.message;
+        }
+        } catch (err) {
+            alert('Oop an error occured: ' + err.message);
         }
     });
 
     // Register event
-    registerBtn.addEventListener('click', async function() {
+    //registerBtn.addEventListener('click', async function() {
+    async function registerUser(event) {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
-
+        try {
         const response = await fetch(`${apiUrl}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -62,6 +75,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const result = await response.json();
         document.getElementById('auth-msg').innerText = result.message;
+        if (result.success) {
+            alert('User registered successully!');
+        } else {
+            alert('Registration failed: ' + result.message);
+        }
+        } catch (err) {
+            alert('Ooops an error occured: ' err.message);
+        }
     });
 
     // Add Todo
