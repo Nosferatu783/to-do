@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let token = localStorage.getItem('token');
 
-    const apiUrl = 'http://localhost:3000';
+    const apiUrl = 'https://to-do-oxeu.onrender.com';
 
     function showAuthSection() {
         authSection.style.display = 'block';
