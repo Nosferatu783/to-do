@@ -1,130 +1,169 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const authSection = document.getElementById('auth-section');
-    const todoSection = document.getElementById('todo-section');
-    const loginBtn = document.getElementById('login-btn');
-    const registerBtn = document.getElementById('register-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const addTodoBtn = document.getElementById('add-todo');
-    const todoList = document.getElementById('todo-list');
-
-    let token = localStorage.getItem('token');
-
-    const apiUrl = 'https://to-do-oxeu.onrender.com';
-    
-    registerBtn.addEventListener('click', registerUser);
-    loginBtn.addEventListener('click', loginUser);
-    
-    
-    function showAuthSection() {
-        authSection.style.display = 'block';
-        todoSection.style.display = 'none';
+// When the DOM content is loaded, attach event listeners to the buttons
+document.addEventListener('DOMContentLoaded', function () {
+    // Attach the event listener for Register form submission
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', registerUser);
     }
 
-    function showTodoSection() {
-        authSection.style.display = 'none';
-        todoSection.style.display = 'block';
+    // Attach the event listener for Login form submission
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', loginUser);
     }
 
-    // Check if token is present on load
-    if (token) {
-        loadTodos();
-    } else {
-        showAuthSection();
+    // Attach the event listener for Add To-Do form submission
+    const todoForm = document.getElementById('todo-form');
+    if (todoForm) {
+        todoForm.addEventListener('submit', addTodo);
     }
 
-    // Login event
-    //loginBtn.addEventListener('click', async function() {
-    async function loginUser(event) {
-        event.preventDefault(); //prevent page from refreshing
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+    // Automatically fetch to-do list when page loads
+    getTodos();
+});
 
-        try {
-            const response = await fetch(`${apiUrl}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-        });
+// Register User Function
+async function registerUser(event) {
+    event.preventDefault(); // Prevent the form from refreshing the page
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-        const result = await response.json();
-        if (result.success) {
-            alert('User login successfull!');
-            localStorage.setItem('token', result.token);
-            token = result.token;
-            loadTodos();
-        } else {
-            alert('Registration failed: ' + result.message);
-            document.getElementById('auth-msg').innerText = result.message;
-        }
-        } catch (err) {
-            alert('Oop an error occured: ' + err.message);
-        }
-    });
-
-    // Register event
-    //registerBtn.addEventListener('click', async function() {
-    async function registerUser(event) {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        try {
-        const response = await fetch(`${apiUrl}/auth/register`, {
+    try {
+        const response = await fetch('/api/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ username, password })
         });
 
-        const result = await response.json();
-        document.getElementById('auth-msg').innerText = result.message;
-        if (result.success) {
-            alert('User registered successully!');
+        const data = await response.json();
+        if (data.success) {
+            alert('User registered successfully!');
         } else {
-            alert('Registration failed: ' + result.message);
+            alert('Registration failed: ' + data.message);
         }
-        } catch (err) {
-            alert('Ooops an error occured: ' err.message);
-        }
-    });
+    } catch (err) {
+        alert('An error occurred: ' + err.message);
+    }
+}
 
-    // Add Todo
-    addTodoBtn.addEventListener('click', async function() {
-        const todoText = document.getElementById('new-todo').value;
-        const response = await fetch(`${apiUrl}/todos`, {
+// Login User Function
+async function loginUser(event) {
+    event.preventDefault(); // Prevent the form from refreshing the page
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: todoText })
+            body: JSON.stringify({ username, password })
         });
 
-        loadTodos();
-    });
-
-    // Load Todos
-    async function loadTodos() {
-        const response = await fetch(`${apiUrl}/todos`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        const todos = await response.json();
-        todoList.innerHTML = '';
-        todos.forEach(todo => {
-            const li = document.createElement('li');
-            li.innerText = todo.text;
-            todoList.appendChild(li);
-        });
-
-        showTodoSection();
+        const data = await response.json();
+        if (data.success) {
+            alert('Login successful!');
+            window.location.href = '/todos.html'; // Redirect to the to-do list page after login
+        } else {
+            alert('Login failed: ' + data.message);
+        }
+    } catch (err) {
+        alert('An error occurred: ' + err.message);
     }
+}
 
-    // Logout
-    logoutBtn.addEventListener('click', function() {
-        localStorage.removeItem('token');
-        token = null;
-        showAuthSection();
+// Fetch To-Do List for Logged-in User
+async function getTodos() {
+    try {
+        const response = await fetch('/api/todos');
+        const todos = await response.json();
+        displayTodos(todos);
+    } catch (err) {
+        console.error('Failed to fetch to-do list:', err);
+    }
+}
+
+// Display the To-Do List on the Page
+function displayTodos(todos) {
+    const todoList = document.getElementById('todo-list');
+    todoList.innerHTML = ''; // Clear any existing list items
+
+    todos.forEach(todo => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${todo.task} ${todo.completed ? '(Completed)' : ''}`;
+        
+        // Add buttons for Update and Delete
+        const updateButton = document.createElement('button');
+        updateButton.textContent = 'Update';
+        updateButton.onclick = () => updateTodo(todo._id, prompt('New Task', todo.task));
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deleteTodo(todo._id);
+
+        listItem.appendChild(updateButton);
+        listItem.appendChild(deleteButton);
+        todoList.appendChild(listItem);
     });
-});
+}
 
+// Add a new To-Do item
+async function addTodo(event) {
+    event.preventDefault(); // Prevent form from refreshing the page
+    const task = document.getElementById('new-task').value;
+
+    try {
+        const response = await fetch('/api/todos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task, completed: false })
+        });
+
+        const todo = await response.json();
+        getTodos(); // Refresh the list after adding
+    } catch (err) {
+        console.error('Failed to add to-do:', err);
+    }
+}
+
+// Update a To-Do item
+async function updateTodo(id, newTask) {
+    try {
+        const response = await fetch(`/api/todos/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ task: newTask })
+        });
+
+        const updatedTodo = await response.json();
+        getTodos(); // Refresh the list after updating
+    } catch (err) {
+        console.error('Failed to update to-do:', err);
+    }
+}
+
+// Delete a To-Do item
+async function deleteTodo(id) {
+    try {
+        const response = await fetch(`/api/todos/${id}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+        if (data.message) {
+            getTodos(); // Refresh the list after deleting
+        }
+    } catch (err) {
+        console.error('Failed to delete to-do:', err);
+    }
+}
+
+// Fetch the to-do list when the page loads
+window.onload = getTodos;
