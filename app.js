@@ -1,15 +1,14 @@
-// When the DOM content is loaded, attach event listeners to the buttons
 document.addEventListener('DOMContentLoaded', function () {
-    // Buttons to show login and register forms
     const showLoginButton = document.getElementById('show-login');
     const showRegisterButton = document.getElementById('show-register');
-
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const todoSection = document.getElementById('todo-section');
     const authSection = document.getElementById('auth-section');
+    const todoForm = document.getElementById('todo-form');
+    const logoutButton = document.getElementById('logout');
 
-    // Attach click event listeners to the buttons
+    // Show Login form when 'Login' button is clicked
     if (showLoginButton) {
         showLoginButton.addEventListener('click', function () {
             loginForm.style.display = 'block';
@@ -17,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Show Register form when 'Register' button is clicked
     if (showRegisterButton) {
         showRegisterButton.addEventListener('click', function () {
             registerForm.style.display = 'block';
@@ -24,35 +24,41 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Attach the event listener for Register form submission
+    // Handle Register form submission
     if (registerForm) {
-        registerForm.addEventListener('submit', registerUser);
+        registerForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission refresh
+            registerUser();
+        });
     }
 
-    // Attach the event listener for Login form submission
+    // Handle Login form submission
     if (loginForm) {
-        loginForm.addEventListener('submit', loginUser);
+        loginForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission refresh
+            loginUser();
+        });
     }
 
-    // Attach the event listener for Add To-Do form submission
-    const todoForm = document.getElementById('todo-form');
+    // Handle adding new to-do item
     if (todoForm) {
-        todoForm.addEventListener('submit', addTodo);
+        todoForm.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission refresh
+            addTodo();
+        });
     }
 
-    // Attach the event listener for Logout button
-    const logoutButton = document.getElementById('logout');
+    // Handle Logout
     if (logoutButton) {
         logoutButton.addEventListener('click', logoutUser);
     }
 
-    // Automatically fetch to-do list if user is authenticated
+    // Call a function to check if user is already authenticated
     checkAuth();
 });
 
-// Register User Function
-async function registerUser(event) {
-    event.preventDefault(); // Prevent the form from refreshing the page
+// Register user
+async function registerUser() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
@@ -68,18 +74,18 @@ async function registerUser(event) {
         const data = await response.json();
         if (data.success) {
             alert('User registered successfully!');
-            showToDoList(); // Show to-do list after successful registration
+            showToDoList(); // Show to-do list section after registration
         } else {
             alert('Registration failed: ' + data.message);
         }
     } catch (err) {
-        alert('An error occurred: ' + err.message);
+        console.error(err);
+        alert('An error occurred during registration');
     }
 }
 
-// Login User Function
-async function loginUser(event) {
-    event.preventDefault(); // Prevent the form from refreshing the page
+// Login user
+async function loginUser() {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
 
@@ -95,16 +101,17 @@ async function loginUser(event) {
         const data = await response.json();
         if (data.success) {
             alert('Login successful!');
-            showToDoList(); // Show to-do list after successful login
+            showToDoList(); // Show to-do list section after login
         } else {
             alert('Login failed: ' + data.message);
         }
     } catch (err) {
-        alert('An error occurred: ' + err.message);
+        console.error(err);
+        alert('An error occurred during login');
     }
 }
 
-// Fetch To-Do List for Logged-in User
+// Fetch To-Do List
 async function getTodos() {
     try {
         const response = await fetch('/api/todos');
@@ -115,33 +122,20 @@ async function getTodos() {
     }
 }
 
-// Display the To-Do List on the Page
+// Display To-Dos
 function displayTodos(todos) {
     const todoList = document.getElementById('todo-list');
-    todoList.innerHTML = ''; // Clear any existing list items
+    todoList.innerHTML = '';
 
     todos.forEach(todo => {
         const listItem = document.createElement('li');
         listItem.textContent = `${todo.task} ${todo.completed ? '(Completed)' : ''}`;
-        
-        // Add buttons for Update and Delete
-        const updateButton = document.createElement('button');
-        updateButton.textContent = 'Update';
-        updateButton.onclick = () => updateTodo(todo._id, prompt('New Task', todo.task));
-        
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.onclick = () => deleteTodo(todo._id);
-
-        listItem.appendChild(updateButton);
-        listItem.appendChild(deleteButton);
         todoList.appendChild(listItem);
     });
 }
 
-// Add a new To-Do item
-async function addTodo(event) {
-    event.preventDefault(); // Prevent form from refreshing the page
+// Add To-Do
+async function addTodo() {
     const task = document.getElementById('new-task').value;
 
     try {
@@ -153,55 +147,31 @@ async function addTodo(event) {
             body: JSON.stringify({ task, completed: false })
         });
 
-        const todo = await response.json();
-        getTodos(); // Refresh the list after adding
+        if (response.ok) {
+            document.getElementById('new-task').value = ''; // Clear the input field
+            getTodos(); // Refresh the list
+        }
     } catch (err) {
         console.error('Failed to add to-do:', err);
     }
 }
 
-// Update a To-Do item
-async function updateTodo(id, newTask) {
-    try {
-        const response = await fetch(`/api/todos/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ task: newTask })
-        });
-
-        const updatedTodo = await response.json();
-        getTodos(); // Refresh the list after updating
-    } catch (err) {
-        console.error('Failed to update to-do:', err);
-    }
+// Logout user
+function logoutUser() {
+    // Logic to log out the user
+    alert('User logged out');
+    authSection.style.display = 'block';
+    todoSection.style.display = 'none';
 }
 
-// Delete a To-Do item
-async function deleteTodo(id) {
-    try {
-        const response = await fetch(`/api/todos/${id}`, {
-            method: 'DELETE'
-        });
-
-        const data = await response.json();
-        if (data.message) {
-            getTodos(); // Refresh the list after deleting
-        }
-    } catch (err) {
-        console.error('Failed to delete to-do:', err);
-    }
-}
-
-// Show To-Do List and Hide Auth Forms
+// Show To-Do List after login/register
 function showToDoList() {
-    document.getElementById('auth-section').style.display = 'none';
-    document.getElementById('todo-section').style.display = 'block';
+    authSection.style.display = 'none';
+    todoSection.style.display = 'block';
     getTodos(); // Fetch and display the to-do list
 }
 
-// Logout User
-function logoutUser() {
-    // Clear any session or authentication token if stored
-    document.getElement
+// Check if user is authenticated (dummy function for now)
+function checkAuth() {
+    // Logic to check if the user is already logged in (session, token, etc.)
+}
