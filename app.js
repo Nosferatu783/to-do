@@ -1,13 +1,35 @@
 // When the DOM content is loaded, attach event listeners to the buttons
 document.addEventListener('DOMContentLoaded', function () {
-    // Attach the event listener for Register form submission
+    // Buttons to show login and register forms
+    const showLoginButton = document.getElementById('show-login');
+    const showRegisterButton = document.getElementById('show-register');
+
+    const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+    const todoSection = document.getElementById('todo-section');
+    const authSection = document.getElementById('auth-section');
+
+    // Attach click event listeners to the buttons
+    if (showLoginButton) {
+        showLoginButton.addEventListener('click', function () {
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        });
+    }
+
+    if (showRegisterButton) {
+        showRegisterButton.addEventListener('click', function () {
+            registerForm.style.display = 'block';
+            loginForm.style.display = 'none';
+        });
+    }
+
+    // Attach the event listener for Register form submission
     if (registerForm) {
         registerForm.addEventListener('submit', registerUser);
     }
 
     // Attach the event listener for Login form submission
-    const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', loginUser);
     }
@@ -18,8 +40,14 @@ document.addEventListener('DOMContentLoaded', function () {
         todoForm.addEventListener('submit', addTodo);
     }
 
-    // Automatically fetch to-do list when page loads
-    getTodos();
+    // Attach the event listener for Logout button
+    const logoutButton = document.getElementById('logout');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logoutUser);
+    }
+
+    // Automatically fetch to-do list if user is authenticated
+    checkAuth();
 });
 
 // Register User Function
@@ -40,6 +68,7 @@ async function registerUser(event) {
         const data = await response.json();
         if (data.success) {
             alert('User registered successfully!');
+            showToDoList(); // Show to-do list after successful registration
         } else {
             alert('Registration failed: ' + data.message);
         }
@@ -66,7 +95,7 @@ async function loginUser(event) {
         const data = await response.json();
         if (data.success) {
             alert('Login successful!');
-            window.location.href = '/todos.html'; // Redirect to the to-do list page after login
+            showToDoList(); // Show to-do list after successful login
         } else {
             alert('Login failed: ' + data.message);
         }
@@ -165,5 +194,14 @@ async function deleteTodo(id) {
     }
 }
 
-// Fetch the to-do list when the page loads
-window.onload = getTodos;
+// Show To-Do List and Hide Auth Forms
+function showToDoList() {
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('todo-section').style.display = 'block';
+    getTodos(); // Fetch and display the to-do list
+}
+
+// Logout User
+function logoutUser() {
+    // Clear any session or authentication token if stored
+    document.getElement
