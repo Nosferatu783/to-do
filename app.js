@@ -63,7 +63,7 @@ async function registerUser() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('/api/register', {
+        const response = await fetch('https://to-do-oxeu.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -90,7 +90,7 @@ async function loginUser() {
     const password = document.getElementById('login-password').value;
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('https://to-do-oxeu.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -114,7 +114,7 @@ async function loginUser() {
 // Fetch To-Do List
 async function getTodos() {
     try {
-        const response = await fetch('/api/todos');
+        const response = await fetch('https://to-do-oxeu.onrender.com');
         const todos = await response.json();
         displayTodos(todos);
     } catch (err) {
