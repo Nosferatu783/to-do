@@ -1,177 +1,167 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const showLoginButton = document.getElementById('show-login');
-    const showRegisterButton = document.getElementById('show-register');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const todoSection = document.getElementById('todo-section');
-    const authSection = document.getElementById('auth-section');
-    const todoForm = document.getElementById('todo-form');
-    const logoutButton = document.getElementById('logout');
+// Determine API base URL dynamically
+const API_BASE_URL = `${window.location.origin}/api`;
 
-    // Show Login form when 'Login' button is clicked
-    if (showLoginButton) {
-        showLoginButton.addEventListener('click', function () {
-            loginForm.style.display = 'block';
-            registerForm.style.display = 'none';
-        });
-    }
+// Select elements
+const registerForm = document.getElementById('register-form');
+const loginForm = document.getElementById('login-form');
+const todoForm = document.getElementById('todo-form');
+const todoSection = document.getElementById('todo-section');
+const authSection = document.getElementById('auth-section');
+const todoList = document.getElementById('todo-list');
+const showRegisterButton = document.getElementById('show-register');
+const showLoginButton = document.getElementById('show-login');
 
-    // Show Register form when 'Register' button is clicked
-    if (showRegisterButton) {
-        showRegisterButton.addEventListener('click', function () {
-            registerForm.style.display = 'block';
-            loginForm.style.display = 'none';
-        });
-    }
-
-    // Handle Register form submission
-    if (registerForm) {
-        registerForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent form submission refresh
-            registerUser();
-        });
-    }
-
-    // Handle Login form submission
-    if (loginForm) {
-        loginForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent form submission refresh
-            loginUser();
-        });
-    }
-
-    // Handle adding new to-do item
-    if (todoForm) {
-        todoForm.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent form submission refresh
-            addTodo();
-        });
-    }
-
-    // Handle Logout
-    if (logoutButton) {
-        logoutButton.addEventListener('click', logoutUser);
-    }
-
-    // Call a function to check if user is already authenticated
-    checkAuth();
+// Toggle forms for login and registration
+showRegisterButton.addEventListener('click', () => {
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'block';
 });
 
-// Register user
-async function registerUser() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+showLoginButton.addEventListener('click', () => {
+  registerForm.style.display = 'none';
+  loginForm.style.display = 'block';
+});
 
-    try {
-        const response = await fetch('https://to-do-oxeu.onrender.com', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
+// User state and authentication token
+let authToken = '';
 
-        const data = await response.json();
-        if (data.success) {
-            alert('User registered successfully!');
-            showToDoList(); // Show to-do list section after registration
-        } else {
-            alert('Registration failed: ' + data.message);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('An error occurred during registration');
-    }
-}
+// Register function
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('register-username').value;
+  const password = document.getElementById('register-password').value;
 
-// Login user
-async function loginUser() {
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-
-    try {
-        const response = await fetch('https://to-do-oxeu.onrender.com', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert('Login successful!');
-            showToDoList(); // Show to-do list section after login
-        } else {
-            alert('Login failed: ' + data.message);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('An error occurred during login');
-    }
-}
-
-// Fetch To-Do List
-async function getTodos() {
-    try {
-        const response = await fetch('https://to-do-oxeu.onrender.com');
-        const todos = await response.json();
-        displayTodos(todos);
-    } catch (err) {
-        console.error('Failed to fetch to-do list:', err);
-    }
-}
-
-// Display To-Dos
-function displayTodos(todos) {
-    const todoList = document.getElementById('todo-list');
-    todoList.innerHTML = '';
-
-    todos.forEach(todo => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${todo.task} ${todo.completed ? '(Completed)' : ''}`;
-        todoList.appendChild(listItem);
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
     });
-}
+    const data = await response.json();
 
-// Add To-Do
-async function addTodo() {
-    const task = document.getElementById('new-task').value;
+    console.log('Register response:', data);  // Log response for debugging
 
-    try {
-        const response = await fetch('/api/todos', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ task, completed: false })
-        });
-
-        if (response.ok) {
-            document.getElementById('new-task').value = ''; // Clear the input field
-            getTodos(); // Refresh the list
-        }
-    } catch (err) {
-        console.error('Failed to add to-do:', err);
+    if (data.success) {
+      alert('Registration successful! Please log in.');
+      registerForm.reset();
+      registerForm.style.display = 'none';
+      loginForm.style.display = 'block';
+    } else {
+      alert(data.message || 'Registration failed.');
     }
+  } catch (error) {
+    console.error('Error during registration:', error);
+    alert('An error occurred during registration.');
+  }
+});
+
+// Login function
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await response.json();
+
+    console.log('Login response:', data);  // Log response for debugging
+
+    if (data.success) {
+      authToken = data.token;
+      authSection.style.display = 'none';
+      todoSection.style.display = 'block';
+      loadTodos();
+    } else {
+      alert(data.message || 'Login failed.');
+    }
+  } catch (error) {
+    console.error('Error during login:', error);
+    alert('An error occurred during login.');
+  }
+});
+
+// Load to-dos
+async function loadTodos() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/todos`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const todos = await response.json();
+    todoList.innerHTML = '';
+    todos.forEach(todo => renderTodoItem(todo));
+  } catch (error) {
+    console.error('Error loading todos:', error);
+  }
 }
 
-// Logout user
-function logoutUser() {
-    // Logic to log out the user
-    alert('User logged out');
-    authSection.style.display = 'block';
-    todoSection.style.display = 'none';
+// Render a to-do item
+function renderTodoItem(todo) {
+  const li = document.createElement('li');
+  li.classList.add('todo-item');
+  li.innerHTML = `
+    <span ${todo.completed ? 'class="completed"' : ''}>${todo.task}</span>
+    <button onclick="toggleComplete('${todo._id}', ${!todo.completed})">${todo.completed ? 'Undo' : 'Done'}</button>
+    <button onclick="deleteTodo('${todo._id}')">Delete</button>
+  `;
+  todoList.appendChild(li);
 }
 
-// Show To-Do List after login/register
-function showToDoList() {
-    authSection.style.display = 'none';
-    todoSection.style.display = 'block';
-    getTodos(); // Fetch and display the to-do list
+// Add a new to-do
+todoForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const task = document.getElementById('new-task').value;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ task }),
+    });
+    const newTodo = await response.json();
+    renderTodoItem(newTodo);
+    todoForm.reset();
+  } catch (error) {
+    console.error('Error adding new todo:', error);
+  }
+});
+
+// Toggle complete status
+async function toggleComplete(id, completed) {
+  try {
+    await fetch(`${API_BASE_URL}/todos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ completed }),
+    });
+    loadTodos();
+  } catch (error) {
+    console.error('Error updating todo:', error);
+  }
 }
 
-// Check if user is authenticated (dummy function for now)
-function checkAuth() {
-    // Logic to check if the user is already logged in (session, token, etc.)
+// Delete a to-do
+async function deleteTodo(id) {
+  try {
+    await fetch(`${API_BASE_URL}/todos/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    loadTodos();
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+  }
 }
+
+// Logout
+document.getElementById('logout').addEventListener('click', () => {
+  authToken = '';
+  todoSection.style.display = 'none';
+  authSection.style.display = 'block';
+  registerForm.style.display = 'none';
+  loginForm.style.display = 'none';
+});
