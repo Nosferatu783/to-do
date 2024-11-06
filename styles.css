@@ -1,109 +1,100 @@
-/* Global Styles */
+/* General Styles */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  font-family: Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f5f5f5;
+  color: #333;
 }
 
-/* Main container */
-.container {
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+/* Container Styles */
+#auth-section, #todo-section {
+  width: 300px;
+  padding: 20px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  text-align: center;
 }
 
-/* Title */
 h2 {
-    text-align: center;
-    color: #5a67d8;
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
-/* Form elements */
-input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-/* Buttons */
+/* Button Styles */
 button {
-    width: 100%;
-    padding: 12px;
-    background-color: #5a67d8;
-    color: white;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
+  background: #007bff;
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 button:hover {
-    background-color: #434190;
+  background: #0056b3;
 }
 
-/* To-Do List Section */
-ul#todo-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 20px;
+/* Input Styles */
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-ul#todo-list li {
-    background-color: #f7fafc;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid #e2e8f0;
+/* To-Do List Styles */
+#todo-list {
+  list-style-type: none;
+  padding: 0;
 }
 
-/* Completed To-Do Item */
-ul#todo-list li.completed {
-    text-decoration: line-through;
-    color: #9f7aea;
+.todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
 }
 
-/* Delete Button */
-ul#todo-list li button {
-    background-color: #e53e3e;
-    border: none;
-    padding: 5px 10px;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+.todo-item span {
+  flex: 1;
 }
 
-ul#todo-list li button:hover {
-    background-color: #c53030;
+.todo-item .completed {
+  text-decoration: line-through;
+  color: #888;
 }
 
-/* Responsive Design */
-@media (max-width: 500px) {
-    .container {
-        padding: 15px;
-    }
+/* Smaller Button Styles for CRUD Actions */
+.todo-item button {
+  font-size: 12px;
+  margin-left: 5px;
+  padding: 5px 8px;
+  background: #28a745;
+}
 
-    button, input[type="text"], input[type="password"] {
-        font-size: 14px;
-    }
+.todo-item button:hover {
+  background: #218838;
+}
+
+/* Logout Button */
+#logout {
+  margin-top: 15px;
+  background: #dc3545;
+}
+
+#logout:hover {
+  background: #c82333;
 }
