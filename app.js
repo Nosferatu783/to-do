@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+//document.addEventListener('DOMContentLoaded', () => {
 // Determine API base URL dynamically
 const API_BASE_URL = `https://to-do-oxeu.onrender.com/api`;
 
@@ -32,7 +32,7 @@ registerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const username = document.getElementById('register-username').value;
   const password = document.getElementById('register-password').value;
-  console.log(username, password);
+  //console.log(username, password);
 
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
@@ -176,4 +176,4 @@ document.getElementById('logout').addEventListener('click', () => {
   registerForm.style.display = 'none';
   loginForm.style.display = 'none';
 });
-});
+//});
