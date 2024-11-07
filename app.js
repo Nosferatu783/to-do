@@ -1,5 +1,7 @@
+document.addEventListener('DOMContentLoaded', () => {
 // Determine API base URL dynamically
 const API_BASE_URL = `https://to-do-oxeu.onrender.com/api`;
+
 
 // Select elements
 const registerForm = document.getElementById('register-form');
@@ -30,28 +32,37 @@ registerForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const username = document.getElementById('register-username').value;
   const password = document.getElementById('register-password').value;
+  console.log(username, password);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: username, password: password })
     });
-    const data = await response.json();
 
-    console.log('Register response:', data);  // Log response for debugging
+    // Check if the response was successful
+    console.log('Response:', response);  // Log the response object
 
-    if (data.success && data.ok) {
+    if (!response.ok) {
+      // Handle non-2xx status codes
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const data = await response.json(); // Only parse JSON if response.ok
+    console.log('Data:', data); // Log the JSON response data
+
+    if (data.success) {
       alert('Registration successful! Please log in.');
-      registerForm.reset();
-      registerForm.style.display = 'none';
-      loginForm.style.display = 'block';
+      document.getElementById('register-form').reset();
+      document.getElementById('register-section').style.display = 'none';
+      document.getElementById('auth-section').style.display = 'block';
     } else {
       alert(data.message || 'Registration failed.');
     }
   } catch (error) {
     console.error('Error during registration:', error);
-    alert('An error occurred during registration.');
+    alert(`An error occurred: ${error.message}`);
   }
 });
 
@@ -164,4 +175,5 @@ document.getElementById('logout').addEventListener('click', () => {
   authSection.style.display = 'block';
   registerForm.style.display = 'none';
   loginForm.style.display = 'none';
+});
 });
