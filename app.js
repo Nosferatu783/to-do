@@ -1,5 +1,5 @@
 // Determine API base URL dynamically
-const API_BASE_URL = `https://to-do-oxeu.onrender.com/api`;
+const API_BASE_URL = `https://to-do-oxeu.onrender.com/api/auth/register`;
 
 // Select elements
 const registerForm = document.getElementById('register-form');
