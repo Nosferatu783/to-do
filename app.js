@@ -41,7 +41,7 @@ registerForm.addEventListener('submit', async (e) => {
 
     console.log('Register response:', data);  // Log response for debugging
 
-    if (data.success) {
+    if (data.success && data.ok) {
       alert('Registration successful! Please log in.');
       registerForm.reset();
       registerForm.style.display = 'none';
