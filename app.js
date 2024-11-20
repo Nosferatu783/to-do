@@ -104,8 +104,13 @@ async function loadTodos() {
     });
     const todos = await response.json();
     todoList.innerHTML = '';
-    todos.forEach(todo => renderTodoItem(todo));
-  } catch (error) {
+    //todos.forEach(todo => renderTodoItem(todo));
+  for (let i = 0; i < todos.length; i++) {
+  const todo = todos[i];
+  renderTodoItem(todo);
+}
+
+  }catch (error) {
     console.error('Error loading todos:', error);
   }
 }
